@@ -24,6 +24,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(backward CXX)
 
 include(BackwardMacros.cmake)
+set(CMAKE_CXX_STANDARD 11)
 
 ###############################################################################
 # COMPILER FLAGS
@@ -46,47 +47,62 @@ set(BACKWARD_ENABLE $<TARGET_OBJECTS:backward_object> CACHE STRING
 
 
 ###############################################################################
+# BACKWARD LIBRARY (Includes backward.cpp)
+###############################################################################
+option(BACKWARD_SHARED "Build dynamic backward-cpp shared lib" OFF)
+
+if(BACKWARD_SHARED)
+    set(libtype SHARED)
+endif()
+add_library(backward ${libtype} backward.cpp)
+target_compile_definitions(backward PUBLIC ${BACKWARD_DEFINITIONS})
+target_include_directories(backward PUBLIC ${BACKWARD_INCLUDE_DIRS})
+
+
+###############################################################################
 # TESTS
 ###############################################################################
 
 if(BACKWARD_TESTS)
-	enable_testing()
+    enable_testing()
 
-	add_library(test_main SHARED test/_test_main.cpp)
+    add_library(test_main SHARED test/_test_main.cpp)
 
-	macro(backward_add_test src)
-		get_filename_component(name ${src} NAME_WE)
-		set(test_name "test_${name}")
+    macro(backward_add_test src)
+        get_filename_component(name ${src} NAME_WE)
+        set(test_name "test_${name}")
 
-		add_executable(${test_name} ${src} ${ARGN})
+        add_executable(${test_name} ${src} ${ARGN})
 
-		set_target_properties(${test_name} PROPERTIES
-			COMPILE_DEFINITIONS "${BACKWARD_DEFINITIONS}")
+        set_target_properties(${test_name} PROPERTIES
+            COMPILE_DEFINITIONS "${BACKWARD_DEFINITIONS}")
 
-		target_include_directories(${test_name} PRIVATE ${BACKWARD_INCLUDE_DIRS})
+        target_include_directories(${test_name} PRIVATE ${BACKWARD_INCLUDE_DIRS})
 
-		target_link_libraries(${test_name} ${BACKWARD_LIBRARIES} test_main)
-		add_test(NAME ${name} COMMAND ${test_name})
-	endmacro()
+        target_link_libraries(${test_name} ${BACKWARD_LIBRARIES} test_main)
+        add_test(NAME ${name} COMMAND ${test_name})
+    endmacro()
 
-	# Tests without backward.cpp
-	set(TESTS
-		test
-		stacktrace
-		rectrace
-		select_signals
-		)
+    # Tests without backward.cpp
+    set(TESTS test stacktrace rectrace select_signals)
 
-	foreach(test ${TESTS})
-		backward_add_test(test/${test}.cpp)
-	endforeach()
+    foreach(test ${TESTS})
+        backward_add_test(test/${test}.cpp)
+    endforeach()
 
-	# Tests with backward.cpp
-	set(TESTS
-		suicide
-		)
+    # Tests with backward.cpp
+    set(TESTS suicide)
 
-	foreach(test ${TESTS})
-		backward_add_test(test/${test}.cpp ${BACKWARD_ENABLE})
-	endforeach()
+    foreach(test ${TESTS})
+        backward_add_test(test/${test}.cpp ${BACKWARD_ENABLE})
+    endforeach()
 endif()
+
+install(
+    FILES "backward.hpp"
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+)
+install(
+    FILES "BackwardConfig.cmake"
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/backward
+)
