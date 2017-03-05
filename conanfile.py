@@ -4,9 +4,10 @@ import os
 class BackwardCpp(ConanFile):
     settings = 'os', 'compiler', 'build_type', 'arch'
     name = 'backward'
-    url = 'https:77github.com/jdiego/backward-cpp'
+    url = 'https://github.com/jdiego/backward-cpp.git'
     license = 'MIT'
-    version = '0.0.0'
+    version = '1.3.0'
+    author = 'Diego Saraiva (diegosaraiva@gmail.com)'
     options = {
         'stack_walking_unwind': [True, False],
         'stack_walking_backtrace': [True, False],
