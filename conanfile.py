@@ -1,12 +1,13 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 import os
 
-class BackwardCpp(ConanFile):
-    settings = 'os', 'compiler', 'build_type', 'arch'
-    name = 'backward'
+
+class BackwardcppConan(ConanFile):
+    name = "backward-cpp"
+    version = "1.3.0"
+    license = "MIT"
     url = 'https://github.com/jdiego/backward-cpp.git'
-    license = 'MIT'
-    version = '1.3.0'
+    settings = "os", "compiler", "build_type", "arch"
     author = 'Diego Saraiva (diegosaraiva@gmail.com)'
     options = {
         'stack_walking_unwind': [True, False],
